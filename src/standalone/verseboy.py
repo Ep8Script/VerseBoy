@@ -139,7 +139,7 @@ class VerseBoy:
 
         timestamp = time.strftime("%Y%m%d-%H%M%S")
         if self.game_title:
-            clean_title = "".join(c for c in self.game_title if c.isalnum() or c in (' ', '_', '-')).strip()
+            clean_title = "".join(c for c in self.game_title if c.isalnum() or c in (" ", "_", "-")).strip()
             filename = f"{clean_title}_{timestamp}.bmp"
         else:
             filename = f"VerseBoy_{timestamp}.bmp"
@@ -269,8 +269,8 @@ class VerseBoy:
                 saved = time.strftime("%Y-%m-%d %H:%M", time.localtime(os.path.getmtime(f"state{slot}.state")))
             except:
                 saved = None
-            self.load_slots.entryconfigure(slot - 1, label=f"Load from Slot {slot} - {saved or 'Empty'}", state="normal" if saved else "disabled")
-            self.save_slots.entryconfigure(slot - 1, label=f"Save to Slot {slot} - {saved or 'Empty'}")
+            self.load_slots.entryconfigure(slot - 1, label=f"Load from Slot {slot} - {saved or "Empty"}", state="normal" if saved else "disabled")
+            self.save_slots.entryconfigure(slot - 1, label=f"Save to Slot {slot} - {saved or "Empty"}")
 
     def update_state(self, **changes):
         state = {"inputs": [], "palette": 1, **self.get_state(), **changes}
