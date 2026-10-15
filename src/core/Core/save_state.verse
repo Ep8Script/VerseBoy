@@ -3,20 +3,20 @@ using { Utils }
 STATE_VERSION <public> : int = 1
 
 DecodeState<public>(InBytes:[]int)<decides><transacts>:emulator_state=
-    Reader := state_reader{Bytes := InBytes}
-    Version := Reader.ReadInt[]
+    Reader:state_reader = state_reader{Bytes := InBytes}
+    Version:int = Reader.ReadInt[]
     Version = STATE_VERSION
-    CartridgeValues := Reader.ReadInts[]
-    CPUValues := Reader.ReadInts[]
-    DMAValues := Reader.ReadInts[]
-    HeaderValues := Reader.ReadInts[]
-    JoypadValues := Reader.ReadInts[]
-    MemoryValues := Reader.ReadBytes[]
-    PPUValues := Reader.ReadInts[]
-    RAMValues := Reader.ReadBytes[]
-    ScreenValues := Reader.ReadBytes[]
-    SerialValues := Reader.ReadInts[]
-    TimerValues := Reader.ReadInts[]
+    CartridgeValues:[]int = Reader.ReadInts[]
+    CPUValues:[]int = Reader.ReadInts[]
+    DMAValues:[]int = Reader.ReadInts[]
+    HeaderValues:[]int = Reader.ReadInts[]
+    JoypadValues:[]int = Reader.ReadInts[]
+    MemoryValues:[]int = Reader.ReadBytes[]
+    PPUValues:[]int = Reader.ReadInts[]
+    RAMValues:[]int = Reader.ReadBytes[]
+    ScreenValues:[]int = Reader.ReadBytes[]
+    SerialValues:[]int = Reader.ReadInts[]
+    TimerValues:[]int = Reader.ReadInts[]
     InBytes.Length = Reader.Position
     emulator_state:
         Cartridge := CartridgeValues
