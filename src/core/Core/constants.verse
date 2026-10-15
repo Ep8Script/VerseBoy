@@ -1,0 +1,5 @@
+PIXEL_START <public> : int = 92
+RETRACE_START <public> : int = 456
+VERTICAL_BLANK_SCAN_LINE <public> : int = 0x90
+VERTICAL_BLANK_SCAN_LINE_MAX <public> : int = 0x99
+CYCLES_PER_FRAME <public> : int = (VERTICAL_BLANK_SCAN_LINE_MAX + 1) * RETRACE_START

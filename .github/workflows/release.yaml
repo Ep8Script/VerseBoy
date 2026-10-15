@@ -1,0 +1,99 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Get Tag
+        run: |
+          # Remove v
+          TAG_NAME=${GITHUB_REF_NAME#v}
+
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+
+      - name: Package Standalone
+        run: |
+          set -euo pipefail
+
+          # Create dist folder
+          mkdir -p dist/Standalone/VerseBoy
+
+          # Copy the Python files
+          (cd src/standalone && find . -name '*.py' -exec cp --parents {} ../../dist/Standalone/VerseBoy/ \;)
+          if [ -z "$(find dist/Standalone/VerseBoy -name '*.py')" ]; then
+            echo "There are no Python files in src/standalone"
+            exit 1
+          fi
+
+          # Copy the license
+          cp LICENSE dist/Standalone/VerseBoy/
+
+          # Download the icon
+          curl -fL --retry 3 -o dist/Standalone/VerseBoy/icon.png "https://cdn.ep8scri.pt/Verse/VerseBoy/icon.png"
+
+          # Build the single Verse file from everything in core and standalone
+          python3 .github/scripts/bundle.py src/core src/standalone \
+            --reference reference.verse \
+            --tag "$TAG_NAME" \
+            --out dist/Standalone/VerseBoy/verseboy.verse
+
+          # Package into zip
+          cd dist/Standalone
+          zip -r -q ../../VerseBoy-standalone.zip .
+
+      - name: Package UEFN
+        run: |
+          set -euo pipefail
+
+          # Create dist folders
+          mkdir -p dist/UEFN/VerseBoy
+
+          # Copy everything
+          cp -r src/core/. dist/UEFN/VerseBoy/
+          cp -r src/uefn/. dist/UEFN/VerseBoy/
+          cp LICENSE dist/UEFN/VerseBoy/
+
+          # Download the UEFN materials
+          curl -fL --retry 3 -o dist/Materials.zip "https://cdn.ep8scri.pt/Verse/VerseBoy/Materials.zip"
+          unzip -q -o dist/Materials.zip -d dist/UEFN/VerseBoy/Materials
+
+          # Package into zip
+          cd dist/UEFN
+          zip -r -q ../../VerseBoy-UEFN.zip .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            VerseBoy-UEFN.zip
+            VerseBoy-standalone.zip
+          name: v${{ env.TAG_NAME }}
+          body: |
+            ## VerseBoy v${{ env.TAG_NAME }}
+            (Description)
+
+            ### Changes
+
+            ### Fixes
+
+            ### Notes
+
+            ### Installation
+            **UEFN:** Download `VerseBoy-UEFN.zip` below and extract it, then copy the "**VerseBoy**" folder to your UEFN project's Content/ directory.
+
+            **Standalone:** Download `VerseBoy-standalone.zip` below and extract it, then run `verse verseboy.verse | py verseboy.py` inside the "**VerseBoy**" folder.
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
