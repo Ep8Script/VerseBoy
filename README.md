@@ -208,7 +208,7 @@ This was done by giving Claude snippets of my code and asking questions on its w
 | rom_64Mb | ✅ |
 | rom_512kb | ✅ |
 
-### Emulator-Only
+### Manual-Only
 | Test | Result |
 | --- | --- |
 | sprite_priority | ✅ |
