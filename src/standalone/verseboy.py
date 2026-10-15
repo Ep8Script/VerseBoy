@@ -99,7 +99,7 @@ class VerseBoy:
                 state = json.load(f)
             return state if isinstance(state, dict) else {}
         except:
-            return {}
+            return {"palette":1}
 
     def load_rom(self):
         rom_path = filedialog.askopenfilename(filetypes=[("Game Boy ROMs", "*.gb;*.gbc")], title="Select a ROM")
