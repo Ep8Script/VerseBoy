@@ -42,7 +42,7 @@ cartridge <public> := class<final><scoped{Core}>:
             if:
                 for (Address := 0x13F..0x142):
                     Byte:int = ROM[Address]
-                    Byte >= 48 and Byte <= 57 or Byte >= 65 and Byte <= 90
+                    Byte >= 0x30 and Byte <= 0x39 or Byte >= 0x41 and Byte <= 0x5A
             then:
                 0x13E
             else:

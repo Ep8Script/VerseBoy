@@ -2,13 +2,13 @@ using { Core }
 using { PPU }
 using { /UnrealEngine.com/JSON }
 
-STATE_FILE <internal> : string = "state.json"
+StateFile <internal> : string = "state.json"
 
 standalone_gameboy <internal> := class<final>(gameboy):
     var CurrentPalette <private> : int = 1
     var GameLoaded <private> : logic = false
     var HeldButtons <private> : []int = ()
-    var Palette <final><override> : []color = DEFAULT_PALETTE_1
+    var Palette <final><override> : []color = DefaultPalette1
     var Paused <private> : logic = false
     var PendingROM <private> : ?string = false
     var SavePath <private> : string = ""
@@ -38,40 +38,40 @@ standalone_gameboy <internal> := class<final>(gameboy):
 
     GetSavePath<private>(Path:string)<transacts>:string =
         Extension:string = ".sav"
-        if (Path.Length >= 4, Path.Slice[Path.Length - 4, Path.Length] = Extension):
-            return Path + ".sav"
+        if (Path.Length >= Extension.Length, Path.Slice[Path.Length - Extension.Length, Path.Length] = Extension):
+            return Path + Extension
 
         var MaybeDotIndex:?int = false
         for (Index := 0..Path.Length - 1, Path[Index] = '.'):
             set MaybeDotIndex = option{Index}
         if (DotIndex := MaybeDotIndex?, NamePath := Path.Slice[0, DotIndex]):
-            return NamePath + ".sav"
-        return Path + ".sav"
+            return NamePath + Extension
+        return Path + Extension
 
     HandleState<private>()<suspends>:void=
-        Result:result(string, io_error) = LoadTextFile(STATE_FILE)
+        Result:result(string, io_error) = LoadTextFile(StateFile)
         if (State := Parse[Result.GetSuccess[]].AsObject[]):
             if (Inputs := State["inputs"].AsArray[]):
-                Buttons:[]int = for (Value : Inputs, Button := Value.AsInt[]) do Button
-                for (Button : HeldButtons, not Buttons.Find[Button]):
+                NewButtons:[]int = for (Value : Inputs, Button := Value.AsInt[]) do Button
+                for (Button : HeldButtons, not NewButtons.Find[Button]):
                     SetButtonReleased(Button)
-                for (Button : Buttons, not HeldButtons.Find[Button]):
+                for (Button : NewButtons, not HeldButtons.Find[Button]):
                     SetButtonPressed(Button)
-                set HeldButtons = Buttons
+                set HeldButtons = NewButtons
             if (NewPalette := State["palette"].AsInt[]):
                 if (CurrentPalette <> NewPalette):
                     if (NewPalette = 1):
                         set CurrentPalette = 1
-                        set Palette = DEFAULT_PALETTE_1
+                        set Palette = DefaultPalette1
                         if (GameLoaded? and Paused?):
                             Screenshot()
                     else if (NewPalette = 2):
                         set CurrentPalette = 2
-                        set Palette = DEFAULT_PALETTE_2
+                        set Palette = DefaultPalette2
                         if (GameLoaded? and Paused?):
                             Screenshot()
             if (Action := State["action"].AsString[]):
-                SaveTextFile(STATE_FILE, "\{\"inputs\": [{Join(for (Button : HeldButtons) do "{Button}", ",")}], \"palette\": {CurrentPalette}\}")
+                SaveTextFile(StateFile, "\{\"inputs\": [{Join(for (Button : HeldButtons) do "{Button}", ",")}], \"palette\": {CurrentPalette}\}")
                 case (Action):
                     "exit" =>
                         FlushSave()

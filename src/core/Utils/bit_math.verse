@@ -1,5 +1,5 @@
-BitMasks <internal> : []int = (1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144)
-Pow4 <public> : []int = (1, 4, 16, 64, 256, 1024, 4096, 16384, 65536, 262144, 1048576, 4194304)
+BitMasks <internal> : []int = (0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000, 0x10000, 0x20000, 0x40000)
+Pow4 <public> : []int = (0x1, 0x4, 0x10, 0x40, 0x100, 0x400, 0x1000, 0x4000, 0x10000, 0x40000, 0x100000, 0x400000)
 
 BitReset<public>(Number:int, Position:int)<computes>:int=
     Mask:int = BitMasks[Position] or 0

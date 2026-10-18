@@ -1,11 +1,11 @@
 using { Utils }
 
-STATE_VERSION <public> : int = 1
+StateVersion <public> : int = 1
 
 DecodeState<public>(InBytes:[]int)<decides><transacts>:emulator_state=
     Reader:state_reader = state_reader{Bytes := InBytes}
     Version:int = Reader.ReadInt[]
-    Version = STATE_VERSION
+    Version = StateVersion
     CartridgeValues:[]int = Reader.ReadInts[]
     CPUValues:[]int = Reader.ReadInts[]
     DMAValues:[]int = Reader.ReadInts[]

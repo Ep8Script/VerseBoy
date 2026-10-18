@@ -1041,64 +1041,64 @@ Opcode0xC3<internal>(Emulator:emulator):void=
     Emulator.CPU_JUMP(false, 0, false)
 
 Opcode0xC2<internal>(Emulator:emulator):void=
-    Emulator.CPU_JUMP(true, FLAG_MASK_Z, false)
+    Emulator.CPU_JUMP(true, FlagMaskZ, false)
 
 Opcode0xCA<internal>(Emulator:emulator):void=
-    Emulator.CPU_JUMP(true, FLAG_MASK_Z, true)
+    Emulator.CPU_JUMP(true, FlagMaskZ, true)
 
 Opcode0xD2<internal>(Emulator:emulator):void=
-    Emulator.CPU_JUMP(true, FLAG_MASK_C, false)
+    Emulator.CPU_JUMP(true, FlagMaskC, false)
 
 Opcode0xDA<internal>(Emulator:emulator):void=
-    Emulator.CPU_JUMP(true, FLAG_MASK_C, true)
+    Emulator.CPU_JUMP(true, FlagMaskC, true)
 
 # Jump with immediate data
 Opcode0x18<internal>(Emulator:emulator):void=
     Emulator.CPU_JUMP_IMMEDIATE(false, 0, false)
 
 Opcode0x20<internal>(Emulator:emulator):void=
-    Emulator.CPU_JUMP_IMMEDIATE(true, FLAG_MASK_Z, false)
+    Emulator.CPU_JUMP_IMMEDIATE(true, FlagMaskZ, false)
 
 Opcode0x28<internal>(Emulator:emulator):void=
-    Emulator.CPU_JUMP_IMMEDIATE(true, FLAG_MASK_Z, true)
+    Emulator.CPU_JUMP_IMMEDIATE(true, FlagMaskZ, true)
 
 Opcode0x30<internal>(Emulator:emulator):void=
-    Emulator.CPU_JUMP_IMMEDIATE(true, FLAG_MASK_C, false)
+    Emulator.CPU_JUMP_IMMEDIATE(true, FlagMaskC, false)
 
 Opcode0x38<internal>(Emulator:emulator):void=
-    Emulator.CPU_JUMP_IMMEDIATE(true, FLAG_MASK_C, true)
+    Emulator.CPU_JUMP_IMMEDIATE(true, FlagMaskC, true)
 
 # Calls
 Opcode0xCD<internal>(Emulator:emulator):void=
     Emulator.CPU_CALL(false, 0, false)
 
 Opcode0xC4<internal>(Emulator:emulator):void=
-    Emulator.CPU_CALL(true, FLAG_MASK_Z, false)
+    Emulator.CPU_CALL(true, FlagMaskZ, false)
 
 Opcode0xCC<internal>(Emulator:emulator):void=
-    Emulator.CPU_CALL(true, FLAG_MASK_Z, true)
+    Emulator.CPU_CALL(true, FlagMaskZ, true)
 
 Opcode0xD4<internal>(Emulator:emulator):void=
-    Emulator.CPU_CALL(true, FLAG_MASK_C, false)
+    Emulator.CPU_CALL(true, FlagMaskC, false)
 
 Opcode0xDC<internal>(Emulator:emulator):void=
-    Emulator.CPU_CALL(true, FLAG_MASK_C, true)
+    Emulator.CPU_CALL(true, FlagMaskC, true)
 
 # Returns
 Opcode0xC9<internal>(Emulator:emulator):void=
     Emulator.CPU_RETURN(false, 0, false)
 
 Opcode0xC0<internal>(Emulator:emulator):void=
-    Emulator.CPU_RETURN(true, FLAG_MASK_Z, false)
+    Emulator.CPU_RETURN(true, FlagMaskZ, false)
 
 Opcode0xC8<internal>(Emulator:emulator):void=
-    Emulator.CPU_RETURN(true, FLAG_MASK_Z, true)
+    Emulator.CPU_RETURN(true, FlagMaskZ, true)
 
 Opcode0xD0<internal>(Emulator:emulator):void=
-    Emulator.CPU_RETURN(true, FLAG_MASK_C, false)
+    Emulator.CPU_RETURN(true, FlagMaskC, false)
 
 Opcode0xD8<internal>(Emulator:emulator):void=
-    Emulator.CPU_RETURN(true, FLAG_MASK_C, true)
+    Emulator.CPU_RETURN(true, FlagMaskC, true)
 
 # Restarts
 Opcode0xC7<internal>(Emulator:emulator):void=
@@ -1262,7 +1262,7 @@ Opcode0x2F<internal>(Emulator:emulator):void=
     EmulatorCPU:cpu = Emulator.CPU
     using { EmulatorCPU }
     set AF.Hi.Value = BitXor(AF.Hi.Value, 0xFF)
-    set AF.Lo.Value = BitSet(BitSet(AF.Lo.Value, FLAG_N), FLAG_H)
+    set AF.Lo.Value = BitSet(BitSet(AF.Lo.Value, FlagN), FlagH)
     set CyclesThisUpdate += 4
 
 Opcode0x76<internal>(Emulator:emulator):void=
@@ -1278,17 +1278,17 @@ Opcode0x76<internal>(Emulator:emulator):void=
 Opcode0x3F<internal>(Emulator:emulator):void=
     EmulatorCPU:cpu = Emulator.CPU
     using { EmulatorCPU }
-    set AF.Lo.Value = if (TestBit[AF.Lo.Value, FLAG_C]):
-        BitReset(AF.Lo.Value, FLAG_C)
+    set AF.Lo.Value = if (TestBit[AF.Lo.Value, FlagC]):
+        BitReset(AF.Lo.Value, FlagC)
     else:
-        BitSet(AF.Lo.Value, FLAG_C)
-    set AF.Lo.Value = BitReset(BitReset(AF.Lo.Value, FLAG_H), FLAG_N)
+        BitSet(AF.Lo.Value, FlagC)
+    set AF.Lo.Value = BitReset(BitReset(AF.Lo.Value, FlagH), FlagN)
     set CyclesThisUpdate += 4
 
 Opcode0x37<internal>(Emulator:emulator):void=
     EmulatorCPU:cpu = Emulator.CPU
     using { EmulatorCPU }
-    set AF.Lo.Value = BitReset(BitReset(BitSet(AF.Lo.Value, FLAG_C), FLAG_H), FLAG_N)
+    set AF.Lo.Value = BitReset(BitReset(BitSet(AF.Lo.Value, FlagC), FlagH), FlagN)
     set CyclesThisUpdate += 4
 
 Opcode0xF8<internal>(Emulator:emulator):void=
@@ -1298,15 +1298,15 @@ Opcode0xF8<internal>(Emulator:emulator):void=
         SignedN:int = N > 127 and N - 256 or N
         Value:int = StackPointer.GetReg() + SignedN
         HL.SetReg(Value)
-        set AF.Lo.Value = BitReset(BitReset(AF.Lo.Value, FLAG_Z), FLAG_N)
+        set AF.Lo.Value = BitReset(BitReset(AF.Lo.Value, FlagZ), FlagN)
         set AF.Lo.Value = if (BitAnd(StackPointer.GetReg(), 0xFF) + N > 0xFF):
-            BitSet(AF.Lo.Value, FLAG_C)
+            BitSet(AF.Lo.Value, FlagC)
         else:
-            BitReset(AF.Lo.Value, FLAG_C)
+            BitReset(AF.Lo.Value, FlagC)
         set AF.Lo.Value = if (BitAnd(StackPointer.GetReg(), 0xF) + BitAnd(N, 0xF) > 0xF):
-            BitSet(AF.Lo.Value, FLAG_H)
+            BitSet(AF.Lo.Value, FlagH)
         else:
-            BitReset(AF.Lo.Value, FLAG_H)
+            BitReset(AF.Lo.Value, FlagH)
         set CyclesThisUpdate += 12
         set ProgramCounter = BitAnd(ProgramCounter + 1, 0xFFFF)
 
@@ -1323,14 +1323,14 @@ Opcode0xE8<internal>(Emulator:emulator):void=
         Before:int = StackPointer.GetReg()
         SignedN:int = N > 127 and N - 256 or N
         StackPointer.SetReg(Before + SignedN)
-        set AF.Lo.Value = BitReset(BitReset(AF.Lo.Value, FLAG_Z), FLAG_N)
+        set AF.Lo.Value = BitReset(BitReset(AF.Lo.Value, FlagZ), FlagN)
         set AF.Lo.Value = if (BitAnd(Before, 0xFF) + N > 0xFF):
-            BitSet(AF.Lo.Value, FLAG_C)
+            BitSet(AF.Lo.Value, FlagC)
         else:
-            BitReset(AF.Lo.Value, FLAG_C)
+            BitReset(AF.Lo.Value, FlagC)
         set AF.Lo.Value = if (BitAnd(Before, 0xF) + BitAnd(N, 0xF) > 0xF):
-            BitSet(AF.Lo.Value, FLAG_H)
+            BitSet(AF.Lo.Value, FlagH)
         else:
-            BitReset(AF.Lo.Value, FLAG_H)
+            BitReset(AF.Lo.Value, FlagH)
         set CyclesThisUpdate += 16
         set ProgramCounter = BitAnd(ProgramCounter + 1, 0xFFFF)

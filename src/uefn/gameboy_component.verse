@@ -23,17 +23,17 @@ gameboy_component <public> := class<final><final_super>(component, gameboy):
     default_rom_prefab_type <private> : castable_concrete_subtype(entity) = entity
 
     @editable
-    var Palette1 <private> : []color = DEFAULT_PALETTE_1
+    var Palette1 <private> : []color = DefaultPalette1
 
     @editable
-    var Palette2 <private> : []color = DEFAULT_PALETTE_2
+    var Palette2 <private> : []color = DefaultPalette2
 
     var Cancelables <private> : []cancelable = ()
     var LastPalette <private> : []color = ()
-    var LastWords <private> : [][]float = for (I := 1..VERTICAL_BLANK_SCAN_LINE * 5) do ()
+    var LastWords <private> : [][]float = for (I := 1..VerticalBlankScanLine * 5) do ()
     LoadedEvent <private> : event() = event(){}
     var RenderedPalette <private> : []color = ()
-    var Scanlines <private> : []M_Scanline = for (I := 1..VERTICAL_BLANK_SCAN_LINE) do M_Scanline{}
+    var Scanlines <private> : []M_Scanline = for (I := 1..VerticalBlankScanLine) do M_Scanline{}
 
     BindInput<public>(Action:input_action(logic), Button:int, InPlayer:player):[]cancelable=
         if (PlayerInput := GetPlayerInput[InPlayer]):
@@ -148,10 +148,10 @@ gameboy_component <public> := class<final><final_super>(component, gameboy):
                                                 Y := 1080.0 / (Scanlines.Length * 1.0)
                                             DefaultImage := Scanline
                 PlayerUI.AddWidget(Overlay)
-            set Cancelables += BindInput(Character.Interact, BUTTON_B, Player)
-            set Cancelables += BindInput(Character.Jump, BUTTON_START, Player)
-            set Cancelables += BindInput(Character.Reload, BUTTON_A, Player)
-            set Cancelables += BindInput(Character.Sprint, BUTTON_SELECT, Player)
+            set Cancelables += BindInput(Character.Interact, Buttons.B, Player)
+            set Cancelables += BindInput(Character.Jump, Buttons.Start, Player)
+            set Cancelables += BindInput(Character.Reload, Buttons.A, Player)
+            set Cancelables += BindInput(Character.Sprint, Buttons.Select, Player)
             if (not HasROM[]):
                 LoadedEvent.Await()
             StartEmulation()

@@ -65,7 +65,7 @@ using { Utils }
         LCDC := Emulator.Memory[0xFF40]
         BitAnd(LCDC, 0x2) <> 0
         Scanline := Emulator.Memory[0xFF44]
-        Scanline < VERTICAL_BLANK_SCAN_LINE
+        Scanline < VerticalBlankScanLine
     then:
         YSize:int = BitAnd(LCDC, 0x4) <> 0 and 16 or 8
         for (Sprite := 0..39):

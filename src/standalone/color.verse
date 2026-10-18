@@ -1,4 +1,4 @@
 color <internal> := struct<computes><concrete>:
-    R  : float = 0.0
-    G  : float = 0.0
-    B  : float = 0.0
+    R <public> : float = 0.0
+    G <public> : float = 0.0
+    B <public> : float = 0.0

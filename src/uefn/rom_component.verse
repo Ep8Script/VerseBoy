@@ -25,7 +25,7 @@ rom_component <public> := class<final><final_super>(component):
             if:
                 for (Address := 0x13F..0x142):
                     Byte:int = GetByte[Address]
-                    Byte >= 48 and Byte <= 57 or Byte >= 65 and Byte <= 90
+                    Byte >= 0x30 and Byte <= 0x39 or Byte >= 0x41 and Byte <= 0x5A
             then:
                 0x13E
             else:

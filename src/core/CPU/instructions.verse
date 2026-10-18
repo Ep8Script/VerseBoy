@@ -64,17 +64,17 @@ using { Utils }
         set Adding = ToAdd
 
     # Are we also adding the carry flag?
-    CarryIn:int = if (AddCarry?, BitAnd(AF.Lo.Value, FLAG_MASK_C) <> 0):
+    CarryIn:int = if (AddCarry?, BitAnd(AF.Lo.Value, FlagMaskC) <> 0):
         1
     else:
         0
     set Reg.Value = BitAnd(Adding + Before + CarryIn, 0xFF)
     if (Reg.Value = 0):
-        set Flags += FLAG_MASK_Z
+        set Flags += FlagMaskZ
     if (BitAnd(Adding, 0xF) + BitAnd(Before, 0xF) + CarryIn > 0xF):
-        set Flags += FLAG_MASK_H
+        set Flags += FlagMaskH
     if (Adding + Before + CarryIn > 0xFF):
-        set Flags += FLAG_MASK_C
+        set Flags += FlagMaskC
     set AF.Lo.Value = Flags
 
 # Subtracts away from reg, can also subtract the carry flag too
@@ -82,7 +82,7 @@ using { Utils }
     EmulatorCPU:cpu = Emulator.CPU
     using { EmulatorCPU }
     var Before:int = Reg.Value
-    var Flags:int = FLAG_MASK_N
+    var Flags:int = FlagMaskN
     var ToSubtract:int = 0
     set CyclesThisUpdate += Cycles
 
@@ -93,18 +93,18 @@ using { Utils }
     else:
         set ToSubtract = Subtracting
 
-    CarryIn:int = if (SubCarry?, BitAnd(AF.Lo.Value, FLAG_MASK_C) <> 0):
+    CarryIn:int = if (SubCarry?, BitAnd(AF.Lo.Value, FlagMaskC) <> 0):
         1
     else:
         0
 
     set Reg.Value = BitAnd(Before - CarryIn - ToSubtract, 0xFF)
     if (Reg.Value = 0):
-        set Flags += FLAG_MASK_Z
+        set Flags += FlagMaskZ
     if (Before < ToSubtract + CarryIn):
-        set Flags += FLAG_MASK_C
+        set Flags += FlagMaskC
     if (BitAnd(Before, 0xF) < BitAnd(ToSubtract, 0xF) + CarryIn):
-        set Flags += FLAG_MASK_H
+        set Flags += FlagMaskH
     set AF.Lo.Value = Flags
 
 (Emulator:emulator).CPU_8BIT_AND<internal>(Reg:reference(int), ToAnd:int, Cycles:int, UseImmediate:logic):void=
@@ -122,9 +122,9 @@ using { Utils }
 
     set Reg.Value = BitAnd(Reg.Value, MyAnd)
     set AF.Lo.Value = if (Reg.Value = 0):
-        FLAG_MASK_Z + FLAG_MASK_H
+        FlagMaskZ + FlagMaskH
     else:
-        FLAG_MASK_H
+        FlagMaskH
 
 (Emulator:emulator).CPU_8BIT_OR<internal>(Reg:reference(int), ToOr:int, Cycles:int, UseImmediate:logic):void=
     EmulatorCPU:cpu = Emulator.CPU
@@ -141,7 +141,7 @@ using { Utils }
 
     set Reg.Value = BitOr(Reg.Value, MyOr)
     set AF.Lo.Value = if (Reg.Value = 0):
-        FLAG_MASK_Z
+        FlagMaskZ
     else:
         0
 
@@ -160,7 +160,7 @@ using { Utils }
 
     set Reg.Value = BitXor(Reg.Value, MyXor)
     set AF.Lo.Value = if (Reg.Value = 0):
-        FLAG_MASK_Z
+        FlagMaskZ
     else:
         0
 
@@ -170,7 +170,7 @@ using { Utils }
     EmulatorCPU:cpu = Emulator.CPU
     using { EmulatorCPU }
     var Before:int = Reg
-    var Flags:int = FLAG_MASK_N
+    var Flags:int = FlagMaskN
     var ToSubtract:int = 0
     set CyclesThisUpdate += Cycles
 
@@ -182,11 +182,11 @@ using { Utils }
         set ToSubtract = Subtracting
 
     if (Before = ToSubtract):
-        set Flags += FLAG_MASK_Z
+        set Flags += FlagMaskZ
     if (Before < ToSubtract):
-        set Flags += FLAG_MASK_C
+        set Flags += FlagMaskC
     if (BitAnd(Before, 0xF) < BitAnd(ToSubtract, 0xF)):
-        set Flags += FLAG_MASK_H
+        set Flags += FlagMaskH
     set AF.Lo.Value = Flags
 
 (Emulator:emulator).CPU_8BIT_INC<internal>(Reg:reference(int), Cycles:int):void=
@@ -197,9 +197,9 @@ using { Utils }
     var Flags:int = BitAnd(AF.Lo.Value, 0x1F)
     Result:int = BitAnd(Before + 1, 0xFF)
     if (Result = 0):
-        set Flags += FLAG_MASK_Z
+        set Flags += FlagMaskZ
     if (BitAnd(Before, 0xF) = 0xF):
-        set Flags += FLAG_MASK_H
+        set Flags += FlagMaskH
     set AF.Lo.Value = Flags
     set CyclesThisUpdate += Cycles
     set Reg.Value = Result
@@ -215,9 +215,9 @@ using { Utils }
         Now:int = BitAnd(Before + 1, 0xFF)
         WriteByte(Address, Now)
         if (Now = 0):
-            set Flags += FLAG_MASK_Z
+            set Flags += FlagMaskZ
         if (BitAnd(Before, 0xF) = 0xF):
-            set Flags += FLAG_MASK_H
+            set Flags += FlagMaskH
         set AF.Lo.Value = Flags
 
 (Emulator:emulator).CPU_8BIT_DEC<internal>(Reg:reference(int), Cycles:int):void=
@@ -225,12 +225,12 @@ using { Utils }
     using { EmulatorCPU }
     # WHEN EDITING THIS FUNCTION DON'T FORGET TO MAKE THE SAME CHANGES TO CPU_8BIT_MEMORY_DEC
     Before:int = Reg.Value
-    var Flags:int = BitAnd(AF.Lo.Value, 0x1F) + FLAG_MASK_N
+    var Flags:int = BitAnd(AF.Lo.Value, 0x1F) + FlagMaskN
     Result:int = BitAnd(Before - 1, 0xFF)
     if (Result = 0):
-        set Flags += FLAG_MASK_Z
+        set Flags += FlagMaskZ
     if (BitAnd(Before, 0xF) = 0):
-        set Flags += FLAG_MASK_H
+        set Flags += FlagMaskH
     set AF.Lo.Value = Flags
     set CyclesThisUpdate += Cycles
     set Reg.Value = Result
@@ -242,13 +242,13 @@ using { Utils }
     # WHEN EDITING THIS FUNCTION DON'T FORGET TO MAKE THE SAME CHANGES TO CPU_8BIT_DEC
     set CyclesThisUpdate += Cycles
     if (Before := ReadMemory[Address]):
-        var Flags:int = BitAnd(AF.Lo.Value, 0x1F) + FLAG_MASK_N
+        var Flags:int = BitAnd(AF.Lo.Value, 0x1F) + FlagMaskN
         Now:int = BitAnd(Before - 1, 0xFF)
         WriteByte(Address, Now)
         if (Now = 0):
-            set Flags += FLAG_MASK_Z
+            set Flags += FlagMaskZ
         if (BitAnd(Before, 0xF) = 0):
-            set Flags += FLAG_MASK_H
+            set Flags += FlagMaskH
         set AF.Lo.Value = Flags
 
 (Emulator:emulator).CPU_16BIT_ADD<internal>(Reg:register, ToAdd:int, Cycles:int):void=
@@ -257,9 +257,9 @@ using { Utils }
     Before:int = Reg.GetReg()
     var Flags:int = BitAnd(AF.Lo.Value, 0x8F)
     if (Before + ToAdd > 0xFFFF):
-        set Flags += FLAG_MASK_C
+        set Flags += FlagMaskC
     if (BitAnd(Before, 0xFFF) + BitAnd(ToAdd, 0xFFF) > 0xFFF):
-        set Flags += FLAG_MASK_H
+        set Flags += FlagMaskH
     Reg.SetReg(Before + ToAdd)
     set AF.Lo.Value = Flags
     set CyclesThisUpdate += Cycles
@@ -328,7 +328,7 @@ using { Utils }
     set CyclesThisUpdate += 8
     Result:int = BitOr(ShiftRightByte(Reg.Value, 0x4), ShiftLeftByte(Reg.Value, 0x4))
     set AF.Lo.Value = if (Result = 0):
-        FLAG_MASK_Z
+        FlagMaskZ
     else:
         0
     set Reg.Value = Result
@@ -344,7 +344,7 @@ using { Utils }
         Result:int = BitOr(ShiftRightByte(Mem, 0x4), ShiftLeftByte(Mem, 0x4))
         WriteByte(Address, Result)
         if (Result = 0):
-            set AF.Lo.Value = FLAG_MASK_Z
+            set AF.Lo.Value = FlagMaskZ
     # WHEN EDITING THIS FUNCTION ALSO EDIT CPU_SWAP_NIBBLES
 
 (Emulator:emulator).CPU_RESTARTS<internal>(N:int):void=
@@ -374,9 +374,9 @@ using { Utils }
 (Emulator:emulator).CPU_TEST_BIT<internal>(Reg:int, Bit:int, Cycles:int):void=
     EmulatorCPU:cpu = Emulator.CPU
     using { EmulatorCPU }
-    var Flags:int = BitAnd(AF.Lo.Value, 0x1F) + FLAG_MASK_H
+    var Flags:int = BitAnd(AF.Lo.Value, 0x1F) + FlagMaskH
     if (not TestBit[Reg, Bit]):
-        set Flags += FLAG_MASK_Z
+        set Flags += FlagMaskZ
     set AF.Lo.Value = Flags
     set CyclesThisUpdate += Cycles
 
@@ -402,10 +402,10 @@ using { Utils }
     set CyclesThisUpdate += 4
     var A:int = AF.Hi.Value
     F:int = AF.Lo.Value
-    var Carry:logic = logic{BitAnd(F, FLAG_MASK_C) <> 0}
-    HalfCarry:logic = logic{BitAnd(F, FLAG_MASK_H) <> 0}
-    var NewFlags:int = BitAnd(F, FLAG_MASK_N)
-    if (BitAnd(F, FLAG_MASK_N) <> 0):
+    var Carry:logic = logic{BitAnd(F, FlagMaskC) <> 0}
+    HalfCarry:logic = logic{BitAnd(F, FlagMaskH) <> 0}
+    var NewFlags:int = BitAnd(F, FlagMaskN)
+    if (BitAnd(F, FlagMaskN) <> 0):
         if (Carry?):
             set A -= 0x60
         if (HalfCarry?):
@@ -419,9 +419,9 @@ using { Utils }
     set A = BitAnd(A, 0xFF)
     set AF.Hi.Value = A
     if (A = 0):
-        set NewFlags += FLAG_MASK_Z
+        set NewFlags += FlagMaskZ
     if (Carry?):
-        set NewFlags += FLAG_MASK_C
+        set NewFlags += FlagMaskC
     set AF.Lo.Value = NewFlags
 
 # Rotate right through carry
@@ -430,16 +430,16 @@ using { Utils }
     using { EmulatorCPU }
     # WHEN EDITING THIS ALSO EDIT CPU_RR_MEMORY
     var Flags:int = 0
-    IsCarrySet:logic = logic{BitAnd(AF.Lo.Value, FLAG_MASK_C) <> 0}
+    IsCarrySet:logic = logic{BitAnd(AF.Lo.Value, FlagMaskC) <> 0}
     IsLSBSet:logic = logic{BitAnd(Reg.Value, 0x1) <> 0}
     var Result:int = ShiftRightByte(Reg.Value, 0x1)
     if (IsCarrySet?):
         set Result = BitOr(Result, 0x80)
     set CyclesThisUpdate += 8
     if (IsLSBSet?):
-        set Flags += FLAG_MASK_C
+        set Flags += FlagMaskC
     if (Result = 0):
-        set Flags += FLAG_MASK_Z
+        set Flags += FlagMaskZ
     set AF.Lo.Value = Flags
     set Reg.Value = Result
 
@@ -452,15 +452,15 @@ using { Utils }
     set CyclesThisUpdate += 16
     if (Value := ReadMemory[Address]):
         var Flags:int = 0
-        IsCarrySet:logic = logic{BitAnd(AF.Lo.Value, FLAG_MASK_C) <> 0}
+        IsCarrySet:logic = logic{BitAnd(AF.Lo.Value, FlagMaskC) <> 0}
         IsLSBSet:logic = logic{BitAnd(Value, 0x1) <> 0}
         var Result:int = ShiftRightByte(Value, 0x1)
         if (IsCarrySet?):
             set Result = BitOr(Result, 0x80)
         if (IsLSBSet?):
-            set Flags += FLAG_MASK_C
+            set Flags += FlagMaskC
         if (Result = 0):
-            set Flags += FLAG_MASK_Z
+            set Flags += FlagMaskZ
         set AF.Lo.Value = Flags
         WriteByte(Address, Result)
 
@@ -474,10 +474,10 @@ using { Utils }
     var Result:int = ShiftLeftByte(Reg.Value, 0x1)
     set CyclesThisUpdate += 8
     if (IsMSBSet?):
-        set Flags += FLAG_MASK_C
+        set Flags += FlagMaskC
         set Result = BitOr(Result, 0x1)
     if (Result = 0):
-        set Flags += FLAG_MASK_Z
+        set Flags += FlagMaskZ
     set AF.Lo.Value = Flags
     set Reg.Value = Result
 
@@ -493,10 +493,10 @@ using { Utils }
         IsMSBSet:logic = logic{BitAnd(Value, 0x80) <> 0}
         var Result:int = ShiftLeftByte(Value, 0x1)
         if (IsMSBSet?):
-            set Flags += FLAG_MASK_C
+            set Flags += FlagMaskC
             set Result = BitOr(Result, 0x1)
         if (Result = 0):
-            set Flags += FLAG_MASK_Z
+            set Flags += FlagMaskZ
         set AF.Lo.Value = Flags
         WriteByte(Address, Result)
 
@@ -510,10 +510,10 @@ using { Utils }
     var Result:int = ShiftRightByte(Reg.Value, 0x1)
     set CyclesThisUpdate += 8
     if (IsLSBSet?):
-        set Flags += FLAG_MASK_C
+        set Flags += FlagMaskC
         set Result = BitOr(Result, 0x80)
     if (Result = 0):
-        set Flags += FLAG_MASK_Z
+        set Flags += FlagMaskZ
     set AF.Lo.Value = Flags
     set Reg.Value = Result
 
@@ -529,10 +529,10 @@ using { Utils }
         IsLSBSet:logic = logic{BitAnd(Value, 0x1) <> 0}
         var Result:int = ShiftRightByte(Value, 0x1)
         if (IsLSBSet?):
-            set Flags += FLAG_MASK_C
+            set Flags += FlagMaskC
             set Result = BitOr(Result, 0x80)
         if (Result = 0):
-            set Flags += FLAG_MASK_Z
+            set Flags += FlagMaskZ
         set AF.Lo.Value = Flags
         WriteByte(Address, Result)
 
@@ -546,9 +546,9 @@ using { Utils }
     var Result:int = ShiftLeftByte(Reg.Value, 0x1)
     set CyclesThisUpdate += 8
     if (IsMSBSet?):
-        set Flags += FLAG_MASK_C
+        set Flags += FlagMaskC
     if (Result = 0):
-        set Flags += FLAG_MASK_Z
+        set Flags += FlagMaskZ
     set AF.Lo.Value = Flags
     set Reg.Value = Result
 
@@ -563,9 +563,9 @@ using { Utils }
         IsMSBSet:logic = logic{BitAnd(Value, 0x80) <> 0}
         var Result:int = ShiftLeftByte(Value, 0x1)
         if (IsMSBSet?):
-            set Flags += FLAG_MASK_C
+            set Flags += FlagMaskC
         if (Result = 0):
-            set Flags += FLAG_MASK_Z
+            set Flags += FlagMaskZ
         set AF.Lo.Value = Flags
         WriteByte(Address, Result)
 
@@ -580,11 +580,11 @@ using { Utils }
     var Result:int = ShiftRightByte(Reg.Value, 0x1)
     set CyclesThisUpdate += 8
     if (IsLSBSet?):
-        set Flags += FLAG_MASK_C
+        set Flags += FlagMaskC
     if (IsMSBSet?):
         set Result = BitOr(Result, 0x80)
     if (Result = 0):
-        set Flags += FLAG_MASK_Z
+        set Flags += FlagMaskZ
     set AF.Lo.Value = Flags
     set Reg.Value = Result
 
@@ -601,11 +601,11 @@ using { Utils }
         IsMSBSet:logic = logic{BitAnd(Value, 0x80) <> 0}
         var Result:int = ShiftRightByte(Value, 0x1)
         if (IsLSBSet?):
-            set Flags += FLAG_MASK_C
+            set Flags += FlagMaskC
         if (IsMSBSet?):
             set Result = BitOr(Result, 0x80)
         if (Result = 0):
-            set Flags += FLAG_MASK_Z
+            set Flags += FlagMaskZ
         set AF.Lo.Value = Flags
         WriteByte(Address, Result)
 
@@ -619,9 +619,9 @@ using { Utils }
     var Result:int = ShiftRightByte(Reg.Value, 0x1)
     set CyclesThisUpdate += 8
     if (IsLSBSet?):
-        set Flags += FLAG_MASK_C
+        set Flags += FlagMaskC
     if (Result = 0):
-        set Flags += FLAG_MASK_Z
+        set Flags += FlagMaskZ
     set AF.Lo.Value = Flags
     set Reg.Value = Result
 
@@ -637,9 +637,9 @@ using { Utils }
         IsLSBSet:logic = logic{BitAnd(Value, 0x1) <> 0}
         var Result:int = ShiftRightByte(Value, 0x1)
         if (IsLSBSet?):
-            set Flags += FLAG_MASK_C
+            set Flags += FlagMaskC
         if (Result = 0):
-            set Flags += FLAG_MASK_Z
+            set Flags += FlagMaskZ
         set AF.Lo.Value = Flags
         WriteByte(Address, Result)
 
@@ -649,16 +649,16 @@ using { Utils }
     using { EmulatorCPU }
     # WHEN EDITING THIS FUNCTION ALSO EDIT CPU_RL_MEMORY
     var Flags:int = 0
-    IsCarrySet:logic = logic{BitAnd(AF.Lo.Value, FLAG_MASK_C) <> 0}
+    IsCarrySet:logic = logic{BitAnd(AF.Lo.Value, FlagMaskC) <> 0}
     IsMSBSet:logic = logic{BitAnd(Reg.Value, 0x80) <> 0}
     var Result:int = ShiftLeftByte(Reg.Value, 0x1)
     set CyclesThisUpdate += 8
     if (IsCarrySet?):
         set Result = BitOr(Result, 0x1)
     if (IsMSBSet?):
-        set Flags += FLAG_MASK_C
+        set Flags += FlagMaskC
     if (Result = 0):
-        set Flags += FLAG_MASK_Z
+        set Flags += FlagMaskZ
     set AF.Lo.Value = Flags
     set Reg.Value = Result
 
@@ -671,14 +671,14 @@ using { Utils }
     set CyclesThisUpdate += 16
     if (Value := ReadMemory[Address]):
         var Flags:int = 0
-        IsCarrySet:logic = logic{BitAnd(AF.Lo.Value, FLAG_MASK_C) <> 0}
+        IsCarrySet:logic = logic{BitAnd(AF.Lo.Value, FlagMaskC) <> 0}
         IsMSBSet:logic = logic{BitAnd(Value, 0x80) <> 0}
         var Result:int = ShiftLeftByte(Value, 0x1)
         if (IsCarrySet?):
             set Result = BitOr(Result, 0x1)
         if (IsMSBSet?):
-            set Flags += FLAG_MASK_C
+            set Flags += FlagMaskC
         if (Result = 0):
-            set Flags += FLAG_MASK_Z
+            set Flags += FlagMaskZ
         set AF.Lo.Value = Flags
         WriteByte(Address, Result)

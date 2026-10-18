@@ -232,8 +232,8 @@ class VerseBoy:
         self.frame = None
         self.game_title = None
         self.paused.set(False)
-        self.photo = tk.PhotoImage(width=160*self.SCALE, height=144*self.SCALE)
-        self.photo.put("#1a1a1a", to=(0, 0, 160*self.SCALE, 144*self.SCALE))
+        self.photo = tk.PhotoImage(height=144*self.SCALE, width=160*self.SCALE)
+        self.photo.put("#1A1A1A", to=(0, 0, 160*self.SCALE, 144*self.SCALE))
         self.root.title("VerseBoy")
         self.label.config(image=self.photo, text="File > Load ROM to start")
 
@@ -262,7 +262,7 @@ class VerseBoy:
         webbrowser.open("https://github.com/Ep8Script/VerseBoy/releases/latest")
 
     def update_menu(self):
-        for label in ("Pause", "Stop", "Reset", "Take Screenshot", "Load State", "Save State"):
+        for label in ("Load State", "Pause", "Reset", "Save State", "Stop", "Take Screenshot"):
             self.emulation.entryconfigure(self.emulation.index(label), state="normal" if self.running else "disabled")
         for slot in range(1, self.SAVE_STATE_SLOTS + 1):
             try:

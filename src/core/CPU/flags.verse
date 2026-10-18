@@ -1,9 +1,9 @@
-FLAG_C <internal> : int = 4
-FLAG_H <internal> : int = 5
-FLAG_N <internal> : int = 6
-FLAG_Z <internal> : int = 7
+FlagC <internal> : int = 0x4
+FlagH <internal> : int = 0x5
+FlagN <internal> : int = 0x6
+FlagZ <internal> : int = 0x7
 
-FLAG_MASK_C <internal> : int = 16
-FLAG_MASK_H <internal> : int = 32
-FLAG_MASK_N <internal> : int = 64
-FLAG_MASK_Z <internal> : int = 128
+FlagMaskC <internal> : int = 0x10
+FlagMaskH <internal> : int = 0x20
+FlagMaskN <internal> : int = 0x40
+FlagMaskZ <internal> : int = 0x80

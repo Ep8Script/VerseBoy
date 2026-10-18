@@ -44,10 +44,7 @@ jobs:
           curl -fL --retry 3 -o dist/Standalone/VerseBoy/icon.png "https://cdn.ep8scri.pt/Verse/VerseBoy/icon.png"
 
           # Build the single Verse file from everything in core and standalone
-          python3 .github/scripts/bundle.py src/core src/standalone \
-            --reference reference.verse \
-            --tag "$TAG_NAME" \
-            --out dist/Standalone/VerseBoy/verseboy.verse
+          python3 .github/scripts/bundle.py src/core src/standalone --tag "$TAG_NAME" --out dist/Standalone/VerseBoy/verseboy.verse
 
           # Package into zip
           cd dist/Standalone

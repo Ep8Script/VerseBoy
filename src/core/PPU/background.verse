@@ -46,7 +46,7 @@ using { Utils }
             TileLocation := TileData + if (Unsigned?):
                 TileNum * 16
             else:
-                SignedTileNum:int = TileNum > 127 and TileNum - 256 or TileNum
+                SignedTileNum:int = TileNum > 0x7F and TileNum - 0x100 or TileNum
                 (SignedTileNum + 128) * 16
             Data1 := Emulator.Memory[TileLocation + TileLine + 1]
             Data2 := Emulator.Memory[TileLocation + TileLine]

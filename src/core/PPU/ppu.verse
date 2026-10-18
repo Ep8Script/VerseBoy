@@ -12,11 +12,11 @@ ppu <public> := class<final><scoped{Core}>:
     var LinePalettes <final><internal> : [palette_register][]int = map{}
     var LineSprites <final><internal> : []int = ()
     var MaybeEmulator <final><scoped{Core}> : ?emulator = false
-    var <private> ModeThreshold <final><internal> : int = RETRACE_START - 80 - 172
+    var <private> ModeThreshold <final><internal> : int = RetraceStart - 80 - 172
     var ObjectPalette0 <private> : []int = (0x0, 0x1, 0x2, 0x3)
     var ObjectPalette1 <private> : []int = (0x0, 0x1, 0x2, 0x3)
     var PaletteUpdates <final><internal> : []palette_update = ()
-    var RetraceLY <final><internal> : int = RETRACE_START
+    var RetraceLY <final><internal> : int = RetraceStart
     var <internal> ScreenData <final><public> : []int = BlankScreen
     var <private> SkipFrame <final><internal> : logic = false
     var <private> Spread <final><internal> : []int = ()
@@ -39,13 +39,13 @@ ppu <public> := class<final><scoped{Core}>:
             set LCDControlUpdates = ()
             set LinePalettes = map{palette_register.Background => BackgroundPalette, palette_register.Object0 => ObjectPalette0, palette_register.Object1 => ObjectPalette1}
             set PaletteUpdates = ()
-            set RetraceLY += RETRACE_START
+            set RetraceLY += RetraceStart
 
             if (Scanline := Emulator.Memory[0xFF44]):
-                if (Scanline = VERTICAL_BLANK_SCAN_LINE):
+                if (Scanline = VerticalBlankScanLine):
                     IssueVerticalBlank()
                 if:
-                    Scanline > VERTICAL_BLANK_SCAN_LINE_MAX
+                    Scanline > VerticalBlankScanLineMax
                     set Emulator.Memory[0xFF44] = 0x0
                 then:
                     set WindowLine = 0
@@ -79,11 +79,11 @@ ppu <public> := class<final><scoped{Core}>:
         STAT:int = Emulator.Memory[0xFF41]
         if (BitAnd(LCDC, 0x80) = 0):
             LY = 0
-            RetraceLY = RETRACE_START
+            RetraceLY = RetraceStart
             BitAnd(STAT, 0x3) = 0
             0x100
         else:
-            LY <= VERTICAL_BLANK_SCAN_LINE_MAX
+            LY <= VerticalBlankScanLineMax
             RetraceLY > 0
             Mode:int = GetMode(LY)
             BitAnd(STAT, 0x3) = Mode
@@ -91,21 +91,21 @@ ppu <public> := class<final><scoped{Core}>:
             StatCoincidence:logic = logic{BitAnd(STAT, 0x4) <> 0}
             Coincidence = StatCoincidence
             var Budget:int = RetraceLY - 1
-            if (LY < VERTICAL_BLANK_SCAN_LINE):
+            if (LY < VerticalBlankScanLine):
                 if (RetraceLY >= ModeThreshold):
                     set Budget = Min(Budget, RetraceLY - ModeThreshold)
-                if (RetraceLY > RETRACE_START - 80):
-                    set Budget = Min(Budget, RetraceLY - (RETRACE_START - 80) - 1)
+                if (RetraceLY > RetraceStart - 80):
+                    set Budget = Min(Budget, RetraceLY - (RetraceStart - 80) - 1)
                 else if (Mode = 3):
                     set Budget = Min(Budget, RetraceLY - ModeThreshold - 1)
-            if (LY = VERTICAL_BLANK_SCAN_LINE and RetraceLY > RETRACE_START - 24):
-                set Budget = Min(Budget, RetraceLY - (RETRACE_START - 24) - 1)
+            if (LY = VerticalBlankScanLine and RetraceLY > RetraceStart - 24):
+                set Budget = Min(Budget, RetraceLY - (RetraceStart - 24) - 1)
             Budget
 
     GetMode<internal>(LY:int)<reads>:int=
-        if (LY >= VERTICAL_BLANK_SCAN_LINE):
+        if (LY >= VerticalBlankScanLine):
             1
-        else if (RetraceLY > RETRACE_START - 80):
+        else if (RetraceLY > RetraceStart - 80):
             if (LY = 0 and SkipFrame?):
                 0
             else:
@@ -126,7 +126,7 @@ ppu <public> := class<final><scoped{Core}>:
                 LCDC := Emulator.Memory[0xFF40]
                 BitAnd(LCDC, 0x2) <> 0
                 Scanline := Emulator.Memory[0xFF44]
-                Scanline < VERTICAL_BLANK_SCAN_LINE
+                Scanline < VerticalBlankScanLine
             then:
                 var LastTile:int = -1
                 for (Key : LineSprites, X := Quotient[Key, 64], X < 168, Tile := Quotient[X, 8], Offset := Mod[X, 8]):
@@ -135,7 +135,7 @@ ppu <public> := class<final><scoped{Core}>:
                         set Penalty += 5 - Min(5, Offset)
                     set Penalty += 6
             Remainder:int = Mod[Penalty, 4] or 0
-            RETRACE_START - 80 - 172 - (Penalty - Remainder) - if (TileOffset = 0):
+            RetraceStart - 80 - 172 - (Penalty - Remainder) - if (TileOffset = 0):
                 0
             else if (TileOffset <= 4):
                 4
@@ -217,9 +217,9 @@ ppu <public> := class<final><scoped{Core}>:
         set LCDControlUpdates = ()
         set LinePalettes = map{palette_register.Background => BackgroundPalette, palette_register.Object0 => ObjectPalette0, palette_register.Object1 => ObjectPalette1}
         set LineSprites = ()
-        set ModeThreshold = RETRACE_START - 80 - 172
+        set ModeThreshold = RetraceStart - 80 - 172
         set PaletteUpdates = ()
-        set RetraceLY = RETRACE_START
+        set RetraceLY = RetraceStart
         set ScreenData = BlankScreen
         set SkipFrame = false
         set Stalls = ()
@@ -255,7 +255,7 @@ ppu <public> := class<final><scoped{Core}>:
                 set RetraceLY -= Cycles
 
             if:
-                Emulator.Memory[0xFF44] > VERTICAL_BLANK_SCAN_LINE_MAX
+                Emulator.Memory[0xFF44] > VerticalBlankScanLineMax
                 set Emulator.Memory[0xFF44] = 0
             then:
                 set WindowLine = 0
@@ -263,7 +263,7 @@ ppu <public> := class<final><scoped{Core}>:
 
             if:
                 LCDOn?
-                Emulator.Memory[0xFF44] < VERTICAL_BLANK_SCAN_LINE
+                Emulator.Memory[0xFF44] < VerticalBlankScanLine
                 Before >= ModeThreshold
                 RetraceLY < ModeThreshold
             then:
@@ -279,7 +279,7 @@ ppu <public> := class<final><scoped{Core}>:
             Emulator := MaybeEmulator?
             LCDC := Emulator.Memory[0xFF40]
             Scanline := Emulator.Memory[0xFF44]
-            Scanline < VERTICAL_BLANK_SCAN_LINE
+            Scanline < VerticalBlankScanLine
         then:
             if:
                 BitAnd(LCDC, 0x20) <> 0
@@ -318,7 +318,7 @@ ppu <public> := class<final><scoped{Core}>:
                             set LCDControlUpdates = ()
                             set LinePalettes = map{palette_register.Background => BackgroundPalette, palette_register.Object0 => ObjectPalette0, palette_register.Object1 => ObjectPalette1}
                             set PaletteUpdates = ()
-                            set RetraceLY = RETRACE_START + 8
+                            set RetraceLY = RetraceStart + 8
                             set SkipFrame = true
                     set ModeThreshold = GetModeThreshold()
                     UpdateLCDC(Offset, Data)

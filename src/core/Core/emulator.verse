@@ -42,7 +42,7 @@ emulator <scoped{CPU, Joypad, PPU, Timer}> := class<final>:
         State.Screen.Length = 23040
         State.Serial.Length = Serial.SaveState().Length
         State.Timer.Length = Self.Timer.SaveState().Length
-        State.Version = STATE_VERSION
+        State.Version = StateVersion
 
     FlushForRegisterWrite<scoped{PPU,Timer}>():void=
         FlushPendingCycles()
@@ -83,13 +83,13 @@ emulator <scoped{CPU, Joypad, PPU, Timer}> := class<final>:
                 else:
                     0
 
-    LoadROM<public>(InROM:[]int):logic=
-        if (InROM.Length < 0x150):
-            return false
-
+    LoadROM<internal>(InROM:[]int):logic=
         if (InROM.Length = 256):
             set BootROM = InROM
             return true
+
+        if (InROM.Length < 336):
+            return false
 
         Self.Cartridge.LoadROM(InROM)
         WasReset:logic = Reset()
@@ -241,7 +241,7 @@ emulator <scoped{CPU, Joypad, PPU, Timer}> := class<final>:
             Screen := Self.PPU.ScreenData
             Serial := Serial.SaveState()
             Timer := Self.Timer.SaveState()
-            Version := STATE_VERSION
+            Version := StateVersion
 
     Skip<private>(Cycles:int):void=
         AdvanceDMA(Cycles)
@@ -257,7 +257,7 @@ emulator <scoped{CPU, Joypad, PPU, Timer}> := class<final>:
             FlushPendingCycles()
             UpdateCycleBudget()
             if:
-                FrameSteps := Quotient[CYCLES_PER_FRAME - Self.CPU.CyclesThisUpdate + 3, 4]
+                FrameSteps := Quotient[CyclesPerFrame - Self.CPU.CyclesThisUpdate + 3, 4]
                 Steps := Min(FrameSteps, Quotient[CycleBudget, 4])
                 Steps >= 1
             then:
@@ -273,12 +273,12 @@ emulator <scoped{CPU, Joypad, PPU, Timer}> := class<final>:
         if (not HasROM[]):
             return
         loop:
-            if (Self.CPU.CyclesThisUpdate >= CYCLES_PER_FRAME):
+            if (Self.CPU.CyclesThisUpdate >= CyclesPerFrame):
                 break
 
             if (Self.CPU.Halted?):
                 SkipHaltedCycles()
-                if (Self.CPU.CyclesThisUpdate >= CYCLES_PER_FRAME):
+                if (Self.CPU.CyclesThisUpdate >= CyclesPerFrame):
                     break
 
             CurrentCycle:int = Self.CPU.CyclesThisUpdate
@@ -298,7 +298,7 @@ emulator <scoped{CPU, Joypad, PPU, Timer}> := class<final>:
                     return
         Self.Cartridge.Update()
         Self.PPU.Update()
-        set Self.CPU.CyclesThisUpdate -= CYCLES_PER_FRAME
+        set Self.CPU.CyclesThisUpdate -= CyclesPerFrame
 
     Update<private>(Cycles:int):void=
         if (PendingCycles + Cycles <= CycleBudget):
