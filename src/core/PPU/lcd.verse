@@ -42,6 +42,10 @@ lcd_state <public> := struct<computes><internal>:
         CurrentRemaining + RetraceStart
     else:
         CurrentRemaining
+    StateLine:int = if (Remaining <= 4 and CurrentLine < VerticalBlankScanLine):
+        CurrentLine + 1
+    else:
+        CurrentLine
     lcd_state:
         BlockedOAM := logic:
             CurrentLine < VerticalBlankScanLine
@@ -58,13 +62,13 @@ lcd_state <public> := struct<computes><internal>:
             CurrentLine < VerticalBlankScanLine
             Remaining > ModeThreshold
             Remaining <= RetraceStart - 80
-        Line := if (Remaining <= 4 and CurrentLine < VerticalBlankScanLine):
-            CurrentLine + 1
+        Line := if (CurrentLine = VerticalBlankScanLineMax and Remaining <= RetraceStart - 4):
+            0
         else:
-            CurrentLine
-        Mode := if (Line >= VerticalBlankScanLine):
+            StateLine
+        Mode := if (StateLine >= VerticalBlankScanLine):
             1
-        else if (Line < VerticalBlankScanLine and Remaining <= 4):
+        else if (StateLine < VerticalBlankScanLine and Remaining <= 4):
             0
         else if (Remaining > RetraceStart - 80):
             if (CurrentLine = 0 and CurrentRemaining > 0 and SkipFrame?):
@@ -112,7 +116,7 @@ lcd_state <public> := struct<computes><internal>:
 
         if (LY := Emulator.Memory[0xFF44]):
             # Set mode as vertical blank
-            Coincidence:logic = logic{LY = Emulator.Memory[0xFF45]}
+            Coincidence:logic = logic{InPPU.GetCompareLine(LY) = Emulator.Memory[0xFF45]}
             CurrentMode:int = InPPU.GetMode(LY)
             var LCDStatus:int = BitOr(BitAnd(OldStatus, 0xF8), CurrentMode)
             StatLine:logic = logic{CurrentMode = 0 and BitAnd(OldStatus, 0x8) <> 0 or CurrentMode = 1 and BitAnd(OldStatus, 0x10) <> 0 or (CurrentMode = 2 or LY = VerticalBlankScanLine and InPPU.RetraceLY > RetraceStart - 24) and BitAnd(OldStatus, 0x20) <> 0 or Coincidence? and BitAnd(OldStatus, 0x40) <> 0}

@@ -87,7 +87,7 @@ ppu <public> := class<final><scoped{Core}>:
             RetraceLY > 0
             Mode:int = GetMode(LY)
             BitAnd(STAT, 0x3) = Mode
-            Coincidence:logic = logic{LY = Emulator.Memory[0xFF45]}
+            Coincidence:logic = logic{GetCompareLine(LY) = Emulator.Memory[0xFF45]}
             StatCoincidence:logic = logic{BitAnd(STAT, 0x4) <> 0}
             Coincidence = StatCoincidence
             var Budget:int = RetraceLY - 1
@@ -100,7 +100,15 @@ ppu <public> := class<final><scoped{Core}>:
                     set Budget = Min(Budget, RetraceLY - ModeThreshold - 1)
             if (LY = VerticalBlankScanLine and RetraceLY > RetraceStart - 24):
                 set Budget = Min(Budget, RetraceLY - (RetraceStart - 24) - 1)
+            if (LY = VerticalBlankScanLineMax and RetraceLY > RetraceStart - 4):
+                set Budget = Min(Budget, RetraceLY - (RetraceStart - 4) - 1)
             Budget
+
+    GetCompareLine<internal>(LY:int)<reads>:int=
+        if (LY = VerticalBlankScanLineMax and RetraceLY <= RetraceStart - 4):
+            0
+        else:
+            LY
 
     GetMode<internal>(LY:int)<reads>:int=
         if (LY >= VerticalBlankScanLine):
@@ -271,6 +279,11 @@ ppu <public> := class<final><scoped{Core}>:
 
             if (RetraceLY <= 0):
                 AdvanceLine()
+                if (Emulator.Memory[0xFF44] = VerticalBlankScanLineMax):
+                    Pulse:logic = logic{BitAnd(Emulator.Memory[0xFF41], 0x10) <> 0 or Emulator.Memory[0xFF45] = VerticalBlankScanLineMax and BitAnd(Emulator.Memory[0xFF41], 0x40) <> 0}
+                    if (Pulse? and not CurrentStatLine?):
+                        Emulator.RequestInterrupt(interrupt.LCDStat)
+                    set CurrentStatLine = Pulse
             SetLCDStatus()
 
     UpdateStalls<private>():void=
@@ -324,6 +337,12 @@ ppu <public> := class<final><scoped{Core}>:
                     UpdateLCDC(Offset, Data)
                     UpdateStalls()
                 Emulator.FlushForRegisterWrite()
+                if (Address = 0xFF41 and BitAnd(Emulator.Memory[0xFF40], 0x80) <> 0, Old := Emulator.Memory[0xFF41], State := GetLCDState[Offset]):
+                    Coincidence:logic = logic{Emulator.Memory[0xFF45] = State.Line and State.ValidCoincidence?}
+                    if (Coincidence? or State.Mode = 0 or State.Mode = 1 or State.Mode = 2 and BitAnd(Old, 0x8) = 0):
+                        if (not CurrentStatLine?):
+                            Emulator.RequestInterrupt(interrupt.LCDStat)
+                        set CurrentStatLine = true
                 if {set Emulator.Memory[Address] = Data}
                 if (Address = 0xFF40):
                     UpdateLineSprites()

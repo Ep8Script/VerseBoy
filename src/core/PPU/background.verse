@@ -19,8 +19,12 @@ using { Utils }
                     set InPPU.WindowTriggered = true
                 if (BitAnd(LCDC, 0x20) <> 0 and InPPU.WindowTriggered? and WindowX <= 159):
                     SplitX:int = Max(WindowX, 0)
+                    WindowOffset:int = if (WindowX = -7):
+                        7 + (Mod[ScrollX, 8] or 0)
+                    else:
+                        -WindowX
                     InPPU.RenderBackgroundSpan(0, SplitX - 1, Scanline, BackgroundLine, BackgroundRow, ScrollX, false)
-                    InPPU.RenderBackgroundSpan(SplitX, 159, Scanline, WindowTileLine, WindowRow, -WindowX, true)
+                    InPPU.RenderBackgroundSpan(SplitX, 159, Scanline, WindowTileLine, WindowRow, WindowOffset, true)
                     set InPPU.WindowLine += 1
                 else:
                     InPPU.RenderBackgroundSpan(0, 159, Scanline, BackgroundLine, BackgroundRow, ScrollX, false)

@@ -126,10 +126,11 @@ standalone_gameboy <internal> := class<final>(gameboy):
             Print("Starting Game")
 
     StartEmulation<override>()<suspends>:void=
-        sync:
+        branch:
             loop:
                 AwaitVerticalBlank()
                 Screenshot()
+        branch:
             loop:
                 SaveBytes:[]int = AwaitSave()
                 if (SavePath.Length > 0):
@@ -137,33 +138,33 @@ standalone_gameboy <internal> := class<final>(gameboy):
                         Byte : SaveBytes
                         Bytes[Byte]
                     SaveTextFile(SavePath, Save)
-            loop:
-                Path:string = AwaitFilePath()
-                Loaded:logic = LoadGame(Path)
-                if (Loaded?):
-                    PrintStart()
-                    loop:
-                        HandleState()
-                        if (File := PendingROM?):
-                            FlushSave()
-                            set PendingROM = false
-                            NewLoaded:logic = LoadGame(File)
-                            if (NewLoaded?):
-                                PrintStart()
-                                set HeldButtons = ()
-                                set Paused = false
-                            else:
-                                Print("Failed to load ROM.")
-                                break
-                        if (Stopped?):
-                            FlushSave()
+        loop:
+            FilePath:string = AwaitFilePath()
+            Loaded:logic = LoadGame(FilePath)
+            if (Loaded?):
+                PrintStart()
+                loop:
+                    HandleState()
+                    if (File := PendingROM?):
+                        FlushSave()
+                        set PendingROM = false
+                        NewLoaded:logic = LoadGame(File)
+                        if (NewLoaded?):
+                            PrintStart()
+                            set HeldButtons = ()
+                            set Paused = false
+                        else:
+                            Print("Failed to load ROM.")
                             break
-                        if (not Paused?):
-                            Update()
-                    set GameLoaded = false
-                    set HeldButtons = ()
-                    set Paused = false
-                    set Stopped = false
-                    Unload()
-                else:
-                    Print("Failed to load ROM.")
+                    if (Stopped?):
+                        FlushSave()
+                        break
+                    if (not Paused?):
+                        Update()
+                set GameLoaded = false
+                set HeldButtons = ()
+                set Paused = false
+                set Stopped = false
+                Unload()
+            else:
+                Print("Failed to load ROM.")
