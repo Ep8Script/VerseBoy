@@ -3,7 +3,7 @@ register <internal> := class<final>:
     Lo <final><internal> : reference(int) = reference(int){Value := 0}
 
     GetReg<internal>()<reads>:int=
-        return (Hi.Value * 0x100) + Lo.Value
+        return Hi.Value * 0x100 + Lo.Value
 
     SetReg<internal>(Value:int)<transacts>:void=
         Word:int = BitAnd(Value, 0xFFFF)

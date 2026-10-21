@@ -8,7 +8,6 @@ standalone_gameboy <internal> := class<final>(gameboy):
     var CurrentPalette <private> : int = 1
     var GameLoaded <private> : logic = false
     var HeldButtons <private> : []int = ()
-    var Palette <final><override> : []color = DefaultPalette1
     var Paused <private> : logic = false
     var PendingROM <private> : ?string = false
     var SavePath <private> : string = ""
@@ -138,12 +137,20 @@ standalone_gameboy <internal> := class<final>(gameboy):
                         Byte : SaveBytes
                         Bytes[Byte]
                     SaveTextFile(SavePath, Save)
+        Result:result(string, io_error) = LoadTextFile(StateFile)
+        if (State := Parse[Result.GetSuccess[]].AsObject[]):
+            if (StatePalette := State["palette"].AsInt[], StatePalette = 2):
+                set CurrentPalette = 2
+                set Palette = DefaultPalette2
+            SaveTextFile(StateFile, "\{\"inputs\": [], \"palette\": {CurrentPalette}\}")
         loop:
             FilePath:string = AwaitFilePath()
             Loaded:logic = LoadGame(FilePath)
             if (Loaded?):
                 PrintStart()
                 loop:
+                    if (not Paused?):
+                        Update()
                     HandleState()
                     if (File := PendingROM?):
                         FlushSave()
@@ -159,8 +166,6 @@ standalone_gameboy <internal> := class<final>(gameboy):
                     if (Stopped?):
                         FlushSave()
                         break
-                    if (not Paused?):
-                        Update()
                 set GameLoaded = false
                 set HeldButtons = ()
                 set Paused = false
